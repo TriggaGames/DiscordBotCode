@@ -31,6 +31,10 @@ async def on_message(message):
     if "shit" in message.content.lower():
         await message.delete()
         await message.channel.send(f"{message.author.mention} - don't use that word!")
+
+    if "67" in message.content:
+        await message.channel.send("https://tenor.com/view/bosnov-67-bosnov-67-67-meme-gif-16727368109953357722")
+        
     
     await bot.process_commands(message)
     
