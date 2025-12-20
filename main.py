@@ -66,6 +66,19 @@ async def secret_error(ctx, error):
     if isinstance(error, commands.MissingRole): 
         await ctx.send("You do not have permission to do that!")
 
+@bot.command()
+async def dm(ctx, *, msg): # msg is the message after the command sent in the chat
+    await ctx.author.send(f"You said {msg}")
 
+@bot.command()
+async def reply(ctx): 
+    await ctx.reply("This is a reply to your message")
+
+@bot.command()
+async def poll(ctx, *, question): 
+    embed = discord.Embed(title="New Poll", description=question)
+    poll_message = await ctx.send(embed=embed)
+    # await poll_message.add_reaction("") #optional: add reactions
+    # await poll_message.add_reaction("")
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
