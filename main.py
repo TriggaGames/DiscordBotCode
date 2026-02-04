@@ -38,8 +38,6 @@ async def on_message(message):
         await message.channel.send("https://tenor.com/view/bosnov-67-bosnov-67-67-meme-gif-16727368109953357722")
         
     if bot.user in message.mentions: 
-        await message.reply(f"Hello {message.author.mention}!")
-        
         # Create AI instance
         client = OpenAI(
             api_key=discord_ai_token
@@ -58,7 +56,12 @@ async def on_message(message):
             store=True
         )     
         
-        await message.channel.send(response.output_text)   
+        reply = f'''Hello {message.author.mention}!
+        
+        {response.output_text}
+        '''
+        
+        await message.reply(reply)
     
     await bot.process_commands(message)
     
