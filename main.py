@@ -56,12 +56,7 @@ async def on_message(message):
             store=True
         )     
         
-        reply = f'''Hello {message.author.mention}!
-        
-        {response.output_text}
-        '''
-        
-        await message.reply(reply)
+        await message.reply(response.output_text)
     
     await bot.process_commands(message)
     
