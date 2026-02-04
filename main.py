@@ -51,7 +51,7 @@ async def on_message(message):
                     "container": {"type": "auto", "memory_limit": "4g"}
                 }
             ],
-            input=message.content,
+            input=str(message.content),
             instructions="You are a friendly, smart AI. Respond to the user with something nice and make sure to answer their questions.",
             store=True
         )     
