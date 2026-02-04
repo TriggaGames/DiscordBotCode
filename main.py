@@ -3,9 +3,11 @@ from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 import os
+from openai import OpenAI
 
 load_dotenv()
-token = os.getenv("DISCORD_BOT_TOKEN")
+discord_bot_token = os.getenv("DISCORD_BOT_TOKEN")
+discord_ai_token = os.getenv("DISCORD_AI_TOKEN")
 
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
@@ -35,6 +37,28 @@ async def on_message(message):
     if "67" in message.content:
         await message.channel.send("https://tenor.com/view/bosnov-67-bosnov-67-67-meme-gif-16727368109953357722")
         
+    if bot.user in message.mentions: 
+        await message.reply(f"Hello {message.author.mention}!")
+        
+        # Create AI instance
+        client = OpenAI(
+            api_key=discord_ai_token
+        )
+
+        response = client.responses.create(
+            model="gpt-4.1",
+            tools=[
+                {
+                    "type": "code_interpreter",
+                    "container": {"type": "auto", "memory_limit": "4g"}
+                }
+            ],
+            input=message.content,
+            instructions="You are a friendly, smart AI. Respond to the user with something nice and make sure to answer their questions.",
+            store=True
+        )     
+        
+        await message.channel.send(response.output_text)   
     
     await bot.process_commands(message)
     
@@ -72,4 +96,4 @@ async def secret_error(ctx, error):
 
 
 
-bot.run(token, log_handler=handler, log_level=logging.DEBUG)
+bot.run(discord_bot_token, log_handler=handler, log_level=logging.DEBUG)

@@ -1,0 +1,23 @@
+AI Response:
+Absolutely! Below is a simple, well-documented Python script that solves the problem \(1 + 1\):
+
+```python
+# Script to solve the math problem: 1 + 1
+
+# Define the numbers
+a = 1
+b = 1
+
+# Add the numbers
+result = a + b
+
+# Output the result
+print("The result of 1 + 1 is:", result)
+```
+
+**How it works:**
+- It defines two variables, `a` and `b`, both set to 1.
+- It adds `a` and `b`, storing the result in `result`.
+- It prints out the result.
+
+Let me know if you want a more advanced example or want to solve a different arithmetic problem!
