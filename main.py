@@ -1,4 +1,5 @@
 import discord
+import io
 from discord.ext import commands
 import logging
 from dotenv import load_dotenv
@@ -44,27 +45,38 @@ async def on_message(message):
     #     ai.load_messages()
     #     message.reply("AI message history had been loaded!")
     if bot.user in message.mentions: 
-        # Make sure user message is in string format
-        user_msg = str(message.content)
-        
-        # Store user message
-        ai.append_messages(
-            "user",
-            user_msg
-            )
-        
         # Send placeholder immediately (prevents timeout)
-        thinking = await message.reply(
-            f"{message.author} thinking… 🤔"
-        )
+        thinking = await message.reply(f"{message.author} thinking… 🤔")
+        
+        try: 
+            # Make sure user message is in string format
+            user_msg = str(message.content.replace(f"<@{bot.user.id}>", "").strip())
+            
+            # Store user message
+            ai.append_messages(
+                "user",
+                user_msg
+            )
 
-        # Run blocking OpenAI call off the event loop
-        await asyncio.to_thread(ai.talk_to_llm)
+            # Run blocking OpenAI call off the event loop
+            await asyncio.to_thread(ai.talk_to_llm)
 
-        messages = ai.get_messages()
-        reply = messages[-1]["content"]
+            messages = ai.get_messages()
+            reply = messages[-1]["content"]
 
-        await thinking.edit(content=reply)
+            # Send response as txt file
+            buffer = io.BytesIO()
+            buffer.write(reply.encode("utf-8"))
+            buffer.seek(0)
+            file = discord.File(buffer, filename="response.md")
+            await thinking.delete()
+            await message.reply(
+                content="Here is your response!",
+                file=file
+            )
+            
+        except Exception as e: 
+            await thinking.edit(f"Couldn't think of anything, sorry.\n\nERROR: {e}")
     
     await bot.process_commands(message)
     
@@ -77,6 +89,8 @@ async def clear(msg):
 async def load(msg): 
     ai.load_messages()
     await msg.reply("AI chat history had been loaded!")
+    
+
     
 # @bot.command()
 # async def hello(ctx): 
