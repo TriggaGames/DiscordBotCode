@@ -72,12 +72,6 @@ class BaseBot:
         # Generate AI response based on stored messages
         response = client.responses.create(
             model=self.__model,
-            tools=[
-                {
-                    "type": "code_interpreter",
-                    "container": {"type": "auto", "memory_limit": "4g"}
-                }
-            ],
             input=self.__messages,
             store=True
         )        
