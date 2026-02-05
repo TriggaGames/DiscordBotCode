@@ -3,7 +3,7 @@ from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 import os
-from openai import OpenAI
+from BaseBot import BaseBot
 
 load_dotenv()
 discord_bot_token = os.getenv("DISCORD_BOT_TOKEN")
@@ -15,8 +15,14 @@ intents.message_content = True
 intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
+ai = BaseBot(discord_ai_token)
+ai.append_messages(
+    "system",
+    "You are an AI agent whos friendly and smart. Make sure to make each response a friendly and smart one."
+    )
+ai.talk_to_llm()
 
-secret_role = "Admin"
+# secret_role = "Admin"
 
 @bot.event
 async def on_ready(): 
@@ -30,67 +36,72 @@ async def on_member_join(member):
 async def on_message(message): 
     if message.author == bot.user: 
         return 
-    if "shit" in message.content.lower():
-        await message.delete()
-        await message.channel.send(f"{message.author.mention} - don't use that word!")
-
-    if "67" in message.content:
-        await message.channel.send("https://tenor.com/view/bosnov-67-bosnov-67-67-meme-gif-16727368109953357722")
-        
+    # if "!clear" in message.content: 
+    #     ai.clear_messages()
+    #     message.reply("AI message history has been cleared!")
+    # elif "!load" in message.content: 
+    #     ai.load_messages()
+    #     message.reply("AI message history had been loaded!")
     if bot.user in message.mentions: 
-        # Create AI instance
-        client = OpenAI(
-            api_key=discord_ai_token
-        )
-
-        response = client.responses.create(
-            model="gpt-4.1",
-            tools=[
-                {
-                    "type": "code_interpreter",
-                    "container": {"type": "auto", "memory_limit": "4g"}
-                }
-            ],
-            input=str(message.content),
-            instructions="You are a friendly, smart AI. Respond to the user with something nice and make sure to answer their questions.",
-            store=True
-        )     
+        # Make sure user message is in string format
+        user_msg = str(message.content)
         
-        await message.reply(response.output_text)
+        # Store user message
+        ai.append_messages(
+            "user",
+            user_msg
+            )
+        
+        # Make conversation to LLM
+        # Tell user thanks for messaging them
+        await message.reply(f"{message.author}, thank you for the mention!")
+        ai.talk_to_llm()
+        messages = ai.get_messages()
+        await message.reply(messages[-1].get("content"))
     
     await bot.process_commands(message)
     
 @bot.command()
-async def hello(ctx): 
-    await ctx.send(f'Hello {ctx.author.mention}!')
+async def clear(msg): 
+    ai.clear_messages()
+    await msg.reply("AI chat history has been cleared!")
     
 @bot.command()
-async def assign(ctx): 
-    role = discord.utils.get(ctx.guild.roles, name=secret_role)
-    if role: 
-        await ctx.author.add_roles(role)
-        await ctx.send(f"{ctx.author.mention} is now assigned to {secret_role}.")
-    else: 
-        await ctx.send("Role doesn't exist")
+async def load(msg): 
+    ai.load_messages()
+    await msg.reply("AI chat history had been loaded!")
     
-@bot.command()
-async def remove(ctx): 
-    role = discord.utils.get(ctx.guild.roles, name=secret_role)
-    if role: 
-        await ctx.author.remove_roles(role)
-        await ctx.send(f"{ctx.author.mention} has had the {secret_role} role removed.")
-    else: 
-        await ctx.send("Role doesn't exist")
+# @bot.command()
+# async def hello(ctx): 
+#     await ctx.send(f'Hello {ctx.author.mention}!')
     
-@bot.command()
-@commands.has_role(secret_role)
-async def secret(ctx):
-    await ctx.send("Welcome to the club!")
+# @bot.command()
+# async def assign(ctx): 
+#     role = discord.utils.get(ctx.guild.roles, name=secret_role)
+#     if role: 
+#         await ctx.author.add_roles(role)
+#         await ctx.send(f"{ctx.author.mention} is now assigned to {secret_role}.")
+#     else: 
+#         await ctx.send("Role doesn't exist")
     
-@secret.error
-async def secret_error(ctx, error): 
-    if isinstance(error, commands.MissingRole): 
-        await ctx.send("You do not have permission to do that!")
+# @bot.command()
+# async def remove(ctx): 
+#     role = discord.utils.get(ctx.guild.roles, name=secret_role)
+#     if role: 
+#         await ctx.author.remove_roles(role)
+#         await ctx.send(f"{ctx.author.mention} has had the {secret_role} role removed.")
+#     else: 
+#         await ctx.send("Role doesn't exist")
+    
+# @bot.command()
+# @commands.has_role(secret_role)
+# async def secret(ctx):
+#     await ctx.send("Welcome to the club!")
+    
+# @secret.error
+# async def secret_error(ctx, error): 
+#     if isinstance(error, commands.MissingRole): 
+#         await ctx.send("You do not have permission to do that!")
 
 
 
