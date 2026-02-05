@@ -4,6 +4,7 @@ import logging
 from dotenv import load_dotenv
 import os
 from BaseBot import BaseBot
+import asyncio
 
 load_dotenv()
 discord_bot_token = os.getenv("DISCORD_BOT_TOKEN")
@@ -52,12 +53,18 @@ async def on_message(message):
             user_msg
             )
         
-        # Make conversation to LLM
-        # Tell user thanks for messaging them
-        await message.reply(f"{message.author}, thank you for the mention!")
-        ai.talk_to_llm()
+        # Send placeholder immediately (prevents timeout)
+        thinking = await message.reply(
+            f"{message.author} thinking… 🤔"
+        )
+
+        # Run blocking OpenAI call off the event loop
+        await asyncio.to_thread(ai.talk_to_llm)
+
         messages = ai.get_messages()
-        await message.reply(messages[-1].get("content"))
+        reply = messages[-1]["content"]
+
+        await thinking.edit(content=reply)
     
     await bot.process_commands(message)
     
