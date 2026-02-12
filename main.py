@@ -40,15 +40,6 @@ ai.append_messages(
 ai.talk_to_llm()
 nh = NotesHandler()
 
-# Helper functions
-def msg_to_file(msg: str, filename: str): 
-    # Send response as file
-    buffer = io.BytesIO()
-    buffer.write(msg)
-    buffer.seek(0)
-    file = discord.File(buffer, filename=filename)
-    return file
-
 @bot.event
 async def on_ready(): 
     print(f'We are ready to go in {bot.user.name}')
@@ -89,8 +80,11 @@ async def on_message(message: discord.Message):
 
             # Send response as txt file
             msg = reply.encode("utf-8")
-            filename = "respond.txt"
-            file = msg_to_file(msg, filename)
+            filename = "response.txt"
+            buffer = io.BytesIO()
+            buffer.write(msg)
+            buffer.seek(0)
+            file = discord.File(buffer, filename=filename)
             await thinking.delete()
             await message.reply(
                 content="Here is your response!",
@@ -125,7 +119,7 @@ async def add_note(msg: discord.Message):
 async def show_notes(msg: discord.Message):
     author = msg.author.mention
     author_notes: dict[str, dict[str, list[str]]] = nh.load_user_notes(author)
-    message = ""
+    message: str = ""
     for date in author_notes: 
         message += f"Date: {date}"
         for time in author_notes[date]:
@@ -133,9 +127,14 @@ async def show_notes(msg: discord.Message):
             notes = author_notes[date].get(time)
             for note in notes: 
                 message += f"\t\tNote: {note}"
-    file = msg_to_file(message, "notes.txt")
+    message = message.encode("utf-8")
+    filename = "response.txt"
+    buffer = io.BytesIO()
+    buffer.write(message)
+    buffer.seek(0)
+    file = discord.File(buffer, filename=filename)
     await msg.reply(
-        content=f"Here is your stores notes {author}!",
+        content=f"Here is your stored notes {author}!",
         file=file
     )    
     
