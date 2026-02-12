@@ -126,31 +126,35 @@ async def show_notes(ctx: commands.Context, *, filetype: str):
     author = ctx.author.mention
     author_notes: dict[str, dict[str, list[str]]] = nh.load_user_notes(author)
 
-    filetypes = [".json", ".md", ".txt"]
-    for type in filetype: 
-        if type in filetype: 
-            filetype = type # look for first type occurence
-            break
-    filename = "notes.txt"
-    if filetype in filetypes: 
-        filename = filename.replace(".txt", filetype)
-    if filetype != ".json": 
-        output: str = ""
-        for date in author_notes: 
+    valid_types = [".json", ".md", ".txt"]
+
+    filetype = filetype.lower().strip()
+
+    if not filetype.startswith("."):
+        filetype = "." + filetype
+
+    if filetype not in valid_types:
+        filetype = ".txt"
+
+    filename = f"notes{filetype}"
+
+    if filetype == ".json":
+        output = json.dumps(author_notes, indent=4)
+    else:
+        output = ""
+        for date in author_notes:
             output += f"Date: {date}\n"
             for time in author_notes[date]:
                 output += f"\tTime Stamp: {time}\n"
-                notes = author_notes[date].get(time)
-                for note in notes: 
+                for note in author_notes[date][time]:
                     output += f"\t\tNote: {note}\n"
-    else: output = json.dumps(author_notes, indent=4)
-    
+
     file = msg_to_file(output.encode("utf-8"), filename)
+
     await ctx.reply(
         content=f"Here is your stored notes {author}!",
         file=file
-    )    
-    
+    )
 
     
 # @bot.command()
