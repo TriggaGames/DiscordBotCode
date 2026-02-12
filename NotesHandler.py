@@ -9,7 +9,7 @@ class NotesHandler:
         # Notes storage
         self.notes: dict[str, dict[str, dict[str, list[str]]]] = {}
         
-    def append_notes(self, user_name: str, *notes: tuple[str]) -> None:
+    def append_notes(self, user_name: str, notes: list[str]) -> None:
         '''Adds date and note of user notes'''
         from datetime import datetime
         now = datetime.now()

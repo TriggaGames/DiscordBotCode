@@ -112,12 +112,12 @@ async def on_message(message: discord.Message):
 @bot.command()
 async def add_note(ctx: commands.Context, *, note_text: str):
     author = ctx.author.mention
-    notes: tuple[str] = tuple(note_text.split("\n"))
+    notes = note_text.splitlines()
     nh.append_notes(author, notes)
     await ctx.reply(f"Note added to notes log for {author}")
     
 @bot.command()
-async def show_notes(ctx: commands.Context):
+async def show_notes(ctx: commands.Context, *, filetype):
     author = ctx.author.mention
     author_notes: dict[str, dict[str, list[str]]] = nh.load_user_notes(author)
     output: str = ""
