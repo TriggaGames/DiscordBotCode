@@ -110,11 +110,9 @@ async def on_message(message: discord.Message):
 #     await msg.reply("AI chat history had been loaded!")
 
 @bot.command()
-async def add_note(ctx: commands.Context):
+async def add_note(ctx: commands.Context, *, note_text: str):
     author = ctx.author.mention
-    msg = ctx.message.content
-    msg = msg.replace('!add_note', '')
-    notes: tuple[str] = tuple(msg.split('\n'))
+    notes: tuple[str] = tuple(note_text.split("\n"))
     nh.append_notes(author, notes)
     await ctx.reply(f"Note added to notes log for {author}")
     
