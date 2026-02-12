@@ -1,11 +1,23 @@
+# Necessary imports
 import discord
 import io
 from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 import os
-from BaseBot import BaseBot
 import asyncio
+
+# Script imports
+from NotesHandler import NotesHandler
+from AIBot import AIBot
+
+# TODO: Add developer mode
+# TODO: Add message history
+# TODO: Add clear history
+# TODO:
+# Add notes
+# TODO: Add show notes
+# TODO: Add clear notes
 
 load_dotenv()
 discord_bot_token = os.getenv("DISCORD_BOT_TOKEN")
@@ -16,26 +28,37 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
+# Main discord bot
 bot = commands.Bot(command_prefix='!', intents=intents)
-ai = BaseBot(discord_ai_token)
+
+# Helper bots
+ai = AIBot(discord_ai_token)
 ai.append_messages(
     "system",
     "You are an AI agent whos friendly and smart. Make sure to make each response a friendly and smart one."
     )
 ai.talk_to_llm()
+nh = NotesHandler()
 
-# secret_role = "Admin"
+# Helper functions
+def msg_to_file(msg: str, filename: str): 
+    # Send response as file
+    buffer = io.BytesIO()
+    buffer.write(msg)
+    buffer.seek(0)
+    file = discord.File(buffer, filename=filename)
+    return file
 
 @bot.event
 async def on_ready(): 
     print(f'We are ready to go in {bot.user.name}')
     
 @bot.event
-async def on_member_join(member): 
+async def on_member_join(member: discord.Member): 
     await member.send(f'Welcome to the server, {member.name}')
     
 @bot.event
-async def on_message(message): 
+async def on_message(message: discord.Message): 
     if message.author == bot.user: 
         return 
     # if "!clear" in message.content: 
@@ -62,13 +85,12 @@ async def on_message(message):
             await asyncio.to_thread(ai.talk_to_llm)
 
             messages = ai.get_messages()
-            reply = messages[-1]["content"]
+            reply: str = messages[-1]["content"]
 
             # Send response as txt file
-            buffer = io.BytesIO()
-            buffer.write(reply.encode("utf-8"))
-            buffer.seek(0)
-            file = discord.File(buffer, filename="response.md")
+            msg = reply.encode("utf-8")
+            filename = "respond.txt"
+            file = msg_to_file(msg, filename)
             await thinking.delete()
             await message.reply(
                 content="Here is your response!",
@@ -80,15 +102,42 @@ async def on_message(message):
     
     await bot.process_commands(message)
     
+    
+# TODO: Work on functionality so that AI can store convo history
+# NOTE: I think that we have to implement github manager to manage file access
+# @bot.command()
+# async def clear(msg): 
+#     ai.clear_messages()
+#     await msg.reply("AI chat history has been cleared!")
+
+# @bot.command()
+# async def load(msg): 
+#     ai.load_messages()
+#     await msg.reply("AI chat history had been loaded!")
+
 @bot.command()
-async def clear(msg): 
-    ai.clear_messages()
-    await msg.reply("AI chat history has been cleared!")
+async def add_note(msg: discord.Message):
+    author = msg.author.mention
+    nh.append_notes(author, msg)
+    await msg.reply(f"Note added to notes log for {author}")
     
 @bot.command()
-async def load(msg): 
-    ai.load_messages()
-    await msg.reply("AI chat history had been loaded!")
+async def show_notes(msg: discord.Message):
+    author = msg.author.mention
+    author_notes: dict[str, dict[str, list[str]]] = nh.load_user_notes(author)
+    message = ""
+    for date in author_notes: 
+        message += f"Date: {date}"
+        for time in author_notes[date]:
+            message += f"\tTime Stamp: {time}"
+            notes = author_notes[date].get(time)
+            for note in notes: 
+                message += f"\t\tNote: {note}"
+    file = msg_to_file(message, "notes.txt")
+    await msg.reply(
+        content=f"Here is your stores notes {author}!",
+        file=file
+    )    
     
 
     
@@ -123,7 +172,5 @@ async def load(msg):
 # async def secret_error(ctx, error): 
 #     if isinstance(error, commands.MissingRole): 
 #         await ctx.send("You do not have permission to do that!")
-
-
 
 bot.run(discord_bot_token, log_handler=handler, log_level=logging.DEBUG)

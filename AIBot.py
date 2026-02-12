@@ -1,8 +1,9 @@
-class BaseBot: 
+class AIBot: 
     
-    '''Base bot that handles conversation with AI model'''
+    '''AI bot that handles conversation with AI model'''
     
     def __init__(self, token: str, model: str = "gpt-3.5-turbo"): 
+        super.__init__()
         from typing import Any
         import os
 
@@ -38,7 +39,6 @@ class BaseBot:
             role: system (background info), user (user responses), assistant (AI)
             msg: message the role made
         '''
-        import json
         
         # Create ai processable message
         ai_msg = {
@@ -48,20 +48,13 @@ class BaseBot:
         
         # Append to message history
         self.__messages.append(ai_msg)
-        
-        # Save to json file
-        with open("message_history.json", "w", encoding='utf-8') as j: 
-            json.dump(self.__messages, j, indent=4)
 
     def clear_messages(self) -> None: 
         '''Clear contained message history'''
         self.__messages = []
         
-    def load_messages(self) -> None: 
+    def load_messages(self, messages: list[dict]) -> None: 
         '''Load message history from saved json file'''
-        import json
-        with open("message_history.json", "r", encoding='utf-8') as j: 
-            messages = json.load(j)
         self.__messages = messages
         
     def talk_to_llm(self) -> None: 
