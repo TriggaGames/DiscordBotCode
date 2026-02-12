@@ -129,7 +129,7 @@ async def show_notes(ctx: commands.Context, *, filetype: str):
     filetypes = [".json", ".md", ".txt"]
     for type in filetype: 
         if type in filetype: 
-            filetype = type
+            filetype = type # look for first type occurence
             break
     filename = "notes.txt"
     if filetype in filetypes: 
@@ -145,9 +145,7 @@ async def show_notes(ctx: commands.Context, *, filetype: str):
                     output += f"\t\tNote: {note}\n"
     else: output = json.dumps(author_notes, indent=4)
     
-    buffer = io.BytesIO()
-    buffer.write(output.encode("utf-8"))
-    file = discord.File(buffer, filename=filename)
+    file = msg_to_file(output.encode("utf-8"), filename)
     await ctx.reply(
         content=f"Here is your stored notes {author}!",
         file=file
