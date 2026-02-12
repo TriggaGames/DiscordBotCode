@@ -2,8 +2,7 @@ class AIBot:
     
     '''AI bot that handles conversation with AI model'''
     
-    def __init__(self, token: str, model: str = "gpt-3.5-turbo"): 
-        super.__init__()
+    def __init__(self, token: str, model: str = "gpt-5-nano"): 
         from typing import Any
         import os
 
