@@ -6,6 +6,7 @@ import logging
 from dotenv import load_dotenv
 import os
 import asyncio
+import json
 
 # Script imports
 from NotesHandler import NotesHandler
@@ -39,6 +40,14 @@ ai.append_messages(
     )
 ai.talk_to_llm()
 nh = NotesHandler()
+
+# Helper Functions
+def msg_to_file(msg: str, filename: str): 
+    buffer = io.BytesIO()
+    buffer.write(msg)
+    buffer.seek(0)
+    file = discord.File(buffer, filename=filename)
+    return file
 
 @bot.event
 async def on_ready(): 
@@ -80,11 +89,7 @@ async def on_message(message: discord.Message):
 
             # Send response as txt file
             msg = reply.encode("utf-8")
-            filename = "response.txt"
-            buffer = io.BytesIO()
-            buffer.write(msg)
-            buffer.seek(0)
-            file = discord.File(buffer, filename=filename)
+            file = msg_to_file(msg, "ai_response.txt")
             await thinking.delete()
             await message.reply(
                 content="Here is your response!",
@@ -117,22 +122,31 @@ async def add_note(ctx: commands.Context, *, note_text: str):
     await ctx.reply(f"Note added to notes log for {author}")
     
 @bot.command()
-async def show_notes(ctx: commands.Context, *, filetype):
+async def show_notes(ctx: commands.Context, *, filetype: str):
     author = ctx.author.mention
     author_notes: dict[str, dict[str, list[str]]] = nh.load_user_notes(author)
-    output: str = ""
-    for date in author_notes: 
-        output += f"Date: {date}\n"
-        for time in author_notes[date]:
-            output += f"\tTime Stamp: {time}\n"
-            notes = author_notes[date].get(time)
-            for note in notes: 
-                output += f"\t\tNote: {note}\n"
-    output_bytes = output.encode("utf-8")
-    filename = "response.txt"
+
+    filetypes = [".json", ".md", ".txt"]
+    for type in filetype: 
+        if type in filetype: 
+            filetype = type
+            break
+    filename = "notes.txt"
+    if filetype in filetypes: 
+        filename = filename.replace(".txt", filetype)
+    if filetype != ".json": 
+        output: str = ""
+        for date in author_notes: 
+            output += f"Date: {date}\n"
+            for time in author_notes[date]:
+                output += f"\tTime Stamp: {time}\n"
+                notes = author_notes[date].get(time)
+                for note in notes: 
+                    output += f"\t\tNote: {note}\n"
+    else: output = json.dumps(author_notes, indent=4)
+    
     buffer = io.BytesIO()
-    buffer.write(output_bytes)
-    buffer.seek(0)
+    buffer.write(output.encode("utf-8"))
     file = discord.File(buffer, filename=filename)
     await ctx.reply(
         content=f"Here is your stored notes {author}!",
