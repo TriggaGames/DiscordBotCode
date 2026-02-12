@@ -110,30 +110,33 @@ async def on_message(message: discord.Message):
 #     await msg.reply("AI chat history had been loaded!")
 
 @bot.command()
-async def add_note(msg: discord.Message):
-    author = msg.author.mention
-    nh.append_notes(author, msg)
-    await msg.reply(f"Note added to notes log for {author}")
+async def add_note(ctx: commands.Context):
+    author = ctx.author.mention
+    msg = ctx.message.content
+    msg = msg.replace('!add_note', '')
+    notes: tuple[str] = tuple(msg.split('\n'))
+    nh.append_notes(author, notes)
+    await ctx.reply(f"Note added to notes log for {author}")
     
 @bot.command()
-async def show_notes(msg: discord.Message):
-    author = msg.author.mention
+async def show_notes(ctx: commands.Context):
+    author = ctx.author.mention
     author_notes: dict[str, dict[str, list[str]]] = nh.load_user_notes(author)
-    message: str = ""
+    output: str = ""
     for date in author_notes: 
-        message += f"Date: {date}"
+        output += f"Date: {date}\n"
         for time in author_notes[date]:
-            message += f"\tTime Stamp: {time}"
+            output += f"\tTime Stamp: {time}\n"
             notes = author_notes[date].get(time)
             for note in notes: 
-                message += f"\t\tNote: {note}"
-    message = message.encode("utf-8")
+                output += f"\t\tNote: {note}\n"
+    output_bytes = output.encode("utf-8")
     filename = "response.txt"
     buffer = io.BytesIO()
-    buffer.write(message)
+    buffer.write(output_bytes)
     buffer.seek(0)
     file = discord.File(buffer, filename=filename)
-    await msg.reply(
+    await ctx.reply(
         content=f"Here is your stored notes {author}!",
         file=file
     )    
