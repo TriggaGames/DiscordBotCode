@@ -156,6 +156,11 @@ async def show_notes(ctx: commands.Context, *, filetype: str):
         file=file
     )
 
+@bot.command()
+async def print_ai_message_history(ctx: commands.Context):
+    messages = ai.get_messages()
+    await ctx.reply(repr(messages))
+    
     
 # @bot.command()
 # async def hello(ctx): 
