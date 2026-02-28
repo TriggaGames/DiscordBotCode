@@ -1,5 +1,6 @@
 # Necessary imports
 import discord
+from discord import app_commands
 import io
 from discord.ext import commands
 import logging
@@ -26,6 +27,8 @@ discord_ai_token = os.getenv("DISCORD_AI_TOKEN")
 
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
+client = discord.Client(intents=intents) # worry about this later
+tree = app_commands.CommandTree(client) # worry about this later
 intents.message_content = True
 intents.members = True
 
@@ -36,7 +39,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 ai = AIBot(discord_ai_token, model="gpt-5.2")
 ai.append_messages(
     "system",
-    "You are an AI agent whos friendly and smart. Make sure to make each response a friendly and smart one."
+    "You are an AI agent whos friendly and smart. Make sure to make each response a friendly and smart one. Make sure to provide a Too Long Didn't Read (TLDR) at the end of your response for people who want short responses, unless your response format cannot allow it."
     )
 ai.talk_to_llm()
 nh = NotesHandler()
@@ -48,6 +51,46 @@ def msg_to_file(msg: str, filename: str):
     buffer.seek(0)
     file = discord.File(buffer, filename=filename)
     return file
+def condense_ai_msg(msg: str, limit: int = 2000) -> list[str]:
+    msg = msg.strip()
+    
+    if (
+        msg.startswith("```") or
+        (msg.startswith("{") and msg.endswith("}")) or
+        (msg.startswith("[") and msg.endswith("]"))
+    ):
+        return [msg]
+    
+    chunks = []
+    try: 
+        paragraphs = msg.split("\n\n")
+        for content in paragraphs: 
+            content = content.strip()
+            
+            while len(content) > limit: 
+                window = content[:limit]
+                
+                # Natural sentence breaks
+                split_index = -1
+                for delimiter in [". ", "! ", "? "]:
+                    split_index = window.rfind(delimiter)
+                    if split_index != -1:
+                        split_index += len(delimiter)
+                        break
+
+                if split_index == -1: 
+                    split_index = limit
+                
+                chunks.append(content[:split_index].strip())
+                content = content[split_index:].strip()
+            
+            if content: 
+                chunks.append(content)
+                
+    except Exception: 
+        chunks.append(msg)
+        
+    return chunks
 
 @bot.event
 async def on_ready(): 
@@ -87,14 +130,11 @@ async def on_message(message: discord.Message):
             messages = ai.get_messages()
             reply: str = messages[-1]["content"]
 
-            # Send response as txt file
-            msg = reply.encode("utf-8")
-            file = msg_to_file(msg, "ai_response.txt")
-            await thinking.delete()
-            await message.reply(
-                content="Here is your response!",
-                file=file
-            )
+            # Send response as structured responses
+            responses = condense_ai_msg(reply)
+            thinking.delete()
+            for msg in responses: 
+                message.reply(msg)
             
         except Exception as e: 
             await thinking.edit(f"Couldn't think of anything, sorry.\n\nERROR: {e}")
