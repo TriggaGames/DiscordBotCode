@@ -132,7 +132,7 @@ async def on_message(message: discord.Message):
 
             # Send response as structured responses
             responses = condense_ai_msg(reply)
-            thinking.delete()
+            await thinking.delete()
             for msg in responses: 
                 message.reply(msg)
             
