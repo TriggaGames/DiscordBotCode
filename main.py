@@ -33,7 +33,7 @@ intents.members = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # Helper bots
-ai = AIBot(discord_ai_token)
+ai = AIBot(discord_ai_token, model="gpt-5.2")
 ai.append_messages(
     "system",
     "You are an AI agent whos friendly and smart. Make sure to make each response a friendly and smart one."
