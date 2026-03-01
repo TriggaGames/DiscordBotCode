@@ -35,11 +35,17 @@ intents.members = True
 # Main discord bot
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+ai_context = '''
+You are an AI agent whos friendly and smart. 
+Make sure to provide a Too Long Didn't Read (TL;DR) at the end of your response for big responses, unless your response format cannot allow it or the response does not need a TL;DR.
+
+'''
+
 # Helper bots
 ai = AIBot(discord_ai_token, model="gpt-5.2")
 ai.append_messages(
     "system",
-    "You are an AI agent whos friendly and smart. Make sure to make each response a friendly and smart one. Make sure to provide a Too Long Didn't Read (TLDR) at the end of your response for people who want short responses, unless your response format cannot allow it."
+    ai_context
     )
 ai.talk_to_llm()
 nh = NotesHandler()
