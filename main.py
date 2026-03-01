@@ -134,7 +134,7 @@ async def on_message(message: discord.Message):
             responses = condense_ai_msg(reply)
             await thinking.delete()
             for msg in responses: 
-                message.reply(msg)
+                await message.reply(msg)
             
         except Exception as e: 
             await thinking.edit(f"Couldn't think of anything, sorry.\n\nERROR: {e}")
