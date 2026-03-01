@@ -38,7 +38,13 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 ai_context = '''
 You are an AI agent whos friendly and smart. 
 Make sure to provide a Too Long Didn't Read (TL;DR) at the end of your response for big responses, unless your response format cannot allow it or the response does not need a TL;DR.
+If prompted to solve a problem that requires more input, make sure to ask for it before doing an online search. 
 
+User information: 
+    Name: Javier Cuevas
+    Description: Mechanical Engineer and Computer Scientist
+    Interests: Engineering and Computer Science projects. Propulsion, cars, and playing volleyball. 
+    Weaknesses: Writing, creativity, and understanding the application of physics concepts in engineering fields. 
 '''
 
 # Helper bots
