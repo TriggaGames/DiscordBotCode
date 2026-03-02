@@ -116,12 +116,9 @@ async def on_member_join(member: discord.Member):
 async def on_message(message: discord.Message): 
     if message.author == bot.user: 
         return 
-    # if "!clear" in message.content: 
-    #     ai.clear_messages()
-    #     message.reply("AI message history has been cleared!")
-    # elif "!load" in message.content: 
-    #     ai.load_messages()
-    #     message.reply("AI message history had been loaded!")
+    if message.attachments: 
+        for attachment in message.attachments: 
+            message.reply(attachment.filename)
     if bot.user in message.mentions: 
         # Send placeholder immediately (prevents timeout)
         thinking = await message.reply(f"{message.author} thinking… 🤔")
@@ -144,9 +141,9 @@ async def on_message(message: discord.Message):
 
             # Send response as structured responses
             responses = condense_ai_msg(reply)
-            await thinking.delete()
-            for msg in responses: 
-                condensed_response = await message.reply(msg)
+            await thinking.edit(responses[0])
+            for msg in range(1, len(responses)): 
+                thinking = await thinking.reply(msg)
             
         except Exception as e: 
             await thinking.edit(f"Couldn't think of anything, sorry.\n\nERROR: {e}")
