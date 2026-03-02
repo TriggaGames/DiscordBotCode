@@ -118,7 +118,10 @@ async def on_message(message: discord.Message):
         return 
     if message.attachments: 
         for attachment in message.attachments: 
-            message.reply(attachment.filename)
+            file_name = str(attachment.filename)
+            url = str(attachment.url)
+            file_name = await message.reply(file_name)
+            url = await message.reply(url)
     if bot.user in message.mentions: 
         # Send placeholder immediately (prevents timeout)
         thinking = await message.reply(f"{message.author} thinking… 🤔")
