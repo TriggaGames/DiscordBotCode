@@ -116,12 +116,6 @@ async def on_member_join(member: discord.Member):
 async def on_message(message: discord.Message): 
     if message.author == bot.user: 
         return 
-    if message.attachments: 
-        for attachment in message.attachments: 
-            file_name = str(attachment.filename)
-            url = str(attachment.url)
-            file_name = await message.reply(file_name)
-            url = await message.reply(url)
     if bot.user in message.mentions: 
         # Send placeholder immediately (prevents timeout)
         thinking = await message.reply(f"{message.author} thinking… 🤔")
@@ -166,9 +160,9 @@ async def on_message(message: discord.Message):
 
             # Send response as structured responses
             responses = condense_ai_msg(reply)
-            await thinking.edit(responses[0])
-            for msg in range(1, len(responses)): 
-                thinking = await thinking.reply(msg)
+            await thinking.delete()
+            for msg in responses: 
+                response = await message.reply(msg)
             
         except Exception as e: 
             await thinking.edit(f"Couldn't think of anything, sorry.\n\nERROR: {e}")

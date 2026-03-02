@@ -20,6 +20,9 @@ class AIBot:
         # Conversation history
         self.__messages: list[dict[str, Any]] = []
         
+        # Tools
+        self.__tools: list[dict[str, Any]] = []
+        
     def set_token(self, token: str): 
         '''Set ai token'''
         self.__token = token
@@ -32,7 +35,7 @@ class AIBot:
         '''Return message history'''
         return self.__messages
 
-    def append_messages(self, role: str, msg: Union[str, list]) -> None: 
+    def append_messages(self, role: str, content: Union[str, list]) -> None: 
         '''
         Append message with role to message history
         
@@ -44,7 +47,7 @@ class AIBot:
         # Create ai processable message
         ai_msg = {
             "role": role, 
-            "content": msg
+            "content": content
         }
         
         # Append to message history
