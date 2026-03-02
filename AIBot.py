@@ -1,5 +1,7 @@
+from typing import Union
+
 class AIBot: 
-    
+
     '''AI bot that handles conversation with AI model'''
     
     def __init__(self, token: str, model: str = "gpt-5-nano"): 
@@ -30,7 +32,7 @@ class AIBot:
         '''Return message history'''
         return self.__messages
 
-    def append_messages(self, role: str, msg: str) -> None: 
+    def append_messages(self, role: str, msg: Union[str, list]) -> None: 
         '''
         Append message with role to message history
         

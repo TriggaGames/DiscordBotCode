@@ -130,10 +130,32 @@ async def on_message(message: discord.Message):
             # Make sure user message is in string format
             user_msg = str(message.content.replace(f"<@{bot.user.id}>", "").strip())
             
-            # Store user message
+            # Crate a list of dictionaries for user and file storage
+            content = []
+            user_query = {
+                "type": "input_text", 
+                "text": user_msg
+            }
+            content.append(user_query)
+            
+            # Check if png, jpeg, webp, or gif attachments were provided
+            if message.attachments: 
+                possible_pic_types = ["png", "jpeg", "webp", "gif"]
+                for attachment in message.attachments: 
+                    file_name = attachment.filename
+                    for type in possible_pic_types: 
+                        if type in file_name: 
+                            image_url = attachment.url
+                            pic_data = {
+                                "type": "input_image",
+                                "image_url": image_url
+                            }
+                            content.append(pic_data)
+                
+            # Store user content
             ai.append_messages(
                 "user",
-                user_msg
+                content
             )
 
             # Run blocking OpenAI call off the event loop
