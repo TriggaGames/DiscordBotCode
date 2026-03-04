@@ -118,7 +118,7 @@ async def on_message(message: discord.Message):
         return 
     if bot.user in message.mentions: 
         # Send placeholder immediately (prevents timeout)
-        thinking = await message.reply(f"{message.author} thinking… 🤔")
+        thinking = await message.reply(f"Processing {message.author}'s message...")
         
         try: 
             # Make sure user message is in string format
@@ -165,7 +165,7 @@ async def on_message(message: discord.Message):
                 response = await message.reply(msg)
             
         except Exception as e: 
-            await thinking.edit(f"Couldn't think of anything, sorry.\n\nERROR: {e}")
+            response = await message.reply(f"ERROR: {e}")
     
     await bot.process_commands(message)
     
