@@ -64,9 +64,7 @@ class AIBot(OpenAI):
     def load_messages(self, messages: list[dict]) -> None: 
         '''Load message history from saved json file'''
         self.__messages = messages
-        
-    def upload_files(self, filename: str, )
-        
+                
     def talk_to_llm(self) -> None: 
         '''Talk to AI using stored messages'''
         # Generate AI response based on stored messages
