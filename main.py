@@ -51,7 +51,7 @@ When responding, DO NOT use LaTeX formating. Use Discord formatting ONLY. You ar
 '''
 
 # Helper bots
-ai = AIBot(discord_ai_token, model="gpt-5.2")
+ai = AIBot(discord_ai_token, model="gpt-5-mini")
 ai.append_messages(
     "system",
     ai_context
