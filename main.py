@@ -51,7 +51,7 @@ When responding, DO NOT use LaTeX formating. Use Discord formatting ONLY. You ar
 '''
 
 # Helper bots
-ai = AIBot(discord_ai_token, model="gpt-5-mini")
+ai = AIBot(discord_ai_token, model="gpt-5.2")
 ai.append_messages(
     "system",
     ai_context
@@ -179,9 +179,9 @@ async def on_message(message: discord.Message):
             )
 
             # Run blocking OpenAI call off the event loop
-            await asyncio.to_thread(ai.talk_to_llm)
+            ai_response = await asyncio.to_thread(ai.talk_to_llm)
 
-            messages = ai.get_messages()
+            messages = ai.get_messages() # Edit conversation history so that old conversations can be stored in some json file that the AI can access if needed
             reply: str = messages[-1]["content"]
 
             # Send response as structured responses
@@ -192,6 +192,7 @@ async def on_message(message: discord.Message):
             
         except Exception as e: 
             response = await message.reply(f"ERROR: {e}")
+            print(f"ERROR: {e}")
     
     await bot.process_commands(message)
     

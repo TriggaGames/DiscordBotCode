@@ -75,3 +75,5 @@ class AIBot(OpenAI):
         )        
         msg = response.output_text
         self.append_messages("assistant", msg)
+        
+        return response.to_dict()
