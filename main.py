@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import os
 import asyncio
 import json
+import requests
 
 # Script imports
 from NotesHandler import NotesHandler
@@ -45,6 +46,8 @@ User information:
     Description: Mechanical Engineer and Computer Scientist
     Interests: Engineering and Computer Science projects. Propulsion, cars, and playing volleyball. 
     Weaknesses: Writing, creativity, and understanding the application of physics concepts in engineering fields. 
+    
+When responding, DO NOT use LaTeX formating. Use Discord formatting ONLY. You are currently responding in Discord. 
 '''
 
 # Helper bots
@@ -134,17 +137,40 @@ async def on_message(message: discord.Message):
             
             # Check if png, jpeg, webp, or gif attachments were provided
             if message.attachments: 
-                possible_pic_types = ["png", "jpeg", "webp", "gif"]
+                # possible_pic_types = ["png", "jpeg", "jpg", "webp", "gif"]
                 for attachment in message.attachments: 
-                    file_name = attachment.filename
-                    for type in possible_pic_types: 
-                        if type in file_name: 
-                            image_url = attachment.url
-                            pic_data = {
-                                "type": "input_image",
-                                "image_url": image_url
-                            }
-                            content.append(pic_data)
+                    try: 
+                        file_bytes = await attachment.read()
+                        raw_filename = attachment.filename
+                        filename = raw_filename.lower()
+                        
+                        if filename.endswith((".png", ".jpg", ".jpeg", ".gif", ".webp")): 
+                            
+                            img = ai.files.create(
+                                file=(raw_filename, file_bytes), 
+                                purpose="vision"
+                            )
+                            
+                            content.append({
+                                "type": "input_image", 
+                                "file_id": img.id
+                            })
+                            
+                        else: 
+                            
+                            file = ai.files.create(
+                                file=(raw_filename, file_bytes), 
+                                purpose="assistants"
+                            )
+                            
+                            content.append({
+                                "type": "input_file", 
+                                "file_id": file.id
+                            })
+                            
+                    except Exception as e: 
+                        message.reply("Error in processing file input, please try again")
+                        raise Exception(f"ERROR. Python Output: {e}")
                 
             # Store user content
             ai.append_messages(

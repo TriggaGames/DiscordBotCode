@@ -1,35 +1,39 @@
 from typing import Union
+from openai import OpenAI
 
-class AIBot: 
+
+class AIBot(OpenAI): 
 
     '''AI bot that handles conversation with AI model'''
     
     def __init__(self, token: str, model: str = "gpt-5-nano"): 
         from typing import Any
         import os
+        
+        super().__init__(api_key=token)
 
         if os.path.exists("message_history.json") is False: 
             import json
             with open("message_history.json", "w") as j: 
                 json.dump([], j, indent=4)
         
-        # Base ai necessities
-        self.__token = token
+        # Set model
         self.__model = model
         
         # Conversation history
         self.__messages: list[dict[str, Any]] = []
         
         # Tools
+        # TODO: Add tools for later use
         self.__tools: list[dict[str, Any]] = []
-        
-    def set_token(self, token: str): 
-        '''Set ai token'''
-        self.__token = token
         
     def set_model(self, model: str): 
         '''Set ai model'''
         self.__model = model
+
+    def get_model(self) -> str: 
+        '''Return ai model'''
+        return self.__model
 
     def get_messages(self): 
         '''Return message history'''
@@ -63,14 +67,11 @@ class AIBot:
         
     def talk_to_llm(self) -> None: 
         '''Talk to AI using stored messages'''
-        from openai import OpenAI
-        # Create client instance
-        client = OpenAI(api_key=self.__token)
         # Generate AI response based on stored messages
-        response = client.responses.create(
+        response = self.responses.create(
             model=self.__model,
             input=self.__messages,
-            store=True
+            tools=self.__tools
         )        
         msg = response.output_text
         self.append_messages("assistant", msg)
