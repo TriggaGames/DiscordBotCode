@@ -78,7 +78,7 @@ def condense_ai_msg(msg: str, limit: int = 2000) -> list[str]:
     
     chunks = []
     try: 
-        paragraphs = msg.split("\n\n")
+        paragraphs = msg.split("\n")
         for content in paragraphs: 
             content = content.strip()
             
