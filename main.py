@@ -66,7 +66,7 @@ def msg_to_file(msg: str, filename: str):
     buffer.seek(0)
     file = discord.File(buffer, filename=filename)
     return file
-def condense_ai_msg(msg: str, limit: int = 2000) -> list[str]:
+def condense_ai_msg(msg: str, limit: int = 3500) -> list[str]:
     msg = msg.strip()
     
     if (
@@ -78,7 +78,7 @@ def condense_ai_msg(msg: str, limit: int = 2000) -> list[str]:
     
     chunks = []
     try: 
-        paragraphs = msg.split("\n")
+        paragraphs = msg.split("\n\n")
         for content in paragraphs: 
             content = content.strip()
             
